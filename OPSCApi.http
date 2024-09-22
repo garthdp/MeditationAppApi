@@ -1,0 +1,6 @@
+@OPSCApi_HostAddress = http://localhost:5255
+
+GET {{OPSCApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
