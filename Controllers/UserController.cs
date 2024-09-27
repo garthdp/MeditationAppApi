@@ -3,6 +3,8 @@ using Google.Cloud.Firestore;
 using System.Net.NetworkInformation;
 using System.Xml.Linq;
 using System.Collections.Generic;
+using OPSCApi.Models;
+using System.Diagnostics;
 
 namespace OPSCApi.Controllers
 {
@@ -48,12 +50,12 @@ namespace OPSCApi.Controllers
             }
             else
             {
-                return NotFound(new { message = "User not found" });
+                return Ok(new { message = "User not found" });
             }
             return Ok(user);
         }
-        [HttpPost("createUser")]
-        public string CreateUser(string email, string name, string surname)
+        [HttpGet("CheckUsername")]
+        public async Task<IActionResult> CheckUsername(string username)
         {
             /*
             Code Attribution
@@ -63,17 +65,38 @@ namespace OPSCApi.Controllers
             Usage: Used to see how to add data to a Firestore database
             */
 
-            DocumentReference doc = db.Collection("Users").Document(email);
+            Query query = db.Collection("Users").WhereEqualTo("Username", username);
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            if (snapshot.Documents.Count > 0)
+            {
+                return Ok(new { message = "Error, username in use." });
+            }
+            return Ok(new { message = "Username fine" });
+        }
+        [HttpPost("createUser")]
+        public async Task<IActionResult> CreateUser([FromBody] User request)
+        {
+            /*
+            Code Attribution
+            Title: C# Firestore Tutorial 2 | How to Store Data | SET Data | English
+            Author: The Amazing Codeverse
+            Link: https://www.youtube.com/watch?v=wUpbpSlYy-Y&list=PLrb70iTVZjZPEbhCh85VQIpRbQos2Qx3i&index=2
+            Usage: Used to see how to add data to a Firestore database
+            */
+
+            DocumentReference docRef = db.Collection("Users").Document(request.Email);
+            DocumentSnapshot emailSnap = await docRef.GetSnapshotAsync();
             Dictionary<string, object> data = new Dictionary<string, object>()
             {
-                {"Email", email},
-                {"Name", name},
-                {"Surname", surname},
+                {"Email", request.Email},
+                {"Username", request.Username},
                 {"Level", 0 },
                 {"Experience", 0 }
             };
-            doc.SetAsync(data);
-            return "added";
+
+            await docRef.SetAsync(data);
+            return Ok(new { message = "User added" });
         }
         [HttpPatch("updateLevel")]
         public async Task<IActionResult> UpdateLevel(string email, int experience)
