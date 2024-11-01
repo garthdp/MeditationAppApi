@@ -18,7 +18,7 @@ namespace OPSCApi.Controllers
         }
 
         [HttpPost]
-        public string Post(string email, string date, string content, string title)
+        public string Post(string email, string date, string content, string title, string color)
         {
             CollectionReference coll = db.Collection("Users").Document(email).Collection("Journals");
             DocumentReference docRef = coll.Document();
@@ -27,6 +27,7 @@ namespace OPSCApi.Controllers
                 {"EntryId", docRef.Id},
                 {"Date", date},
                 {"Title", title},
+                {"Color", color},
                 {"Content", content }
             };
             docRef.SetAsync(data);

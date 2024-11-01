@@ -50,7 +50,7 @@ namespace OPSCApi.Controllers
             }
             else
             {
-                return Ok(new { message = "User not found" });
+                return NotFound(new { message = "User not found" });
             }
             return Ok(user);
         }
@@ -75,7 +75,7 @@ namespace OPSCApi.Controllers
             return Ok(new { message = "Username fine" });
         }
         [HttpPost("createUser")]
-        public async Task<IActionResult> CreateUser([FromBody] User request)
+        public async Task<IActionResult> CreateUser(string email, string name)
         {
             /*
             Code Attribution
@@ -85,12 +85,12 @@ namespace OPSCApi.Controllers
             Usage: Used to see how to add data to a Firestore database
             */
 
-            DocumentReference docRef = db.Collection("Users").Document(request.Email);
+            DocumentReference docRef = db.Collection("Users").Document(email);
             DocumentSnapshot emailSnap = await docRef.GetSnapshotAsync();
             Dictionary<string, object> data = new Dictionary<string, object>()
             {
-                {"Email", request.Email},
-                {"Username", request.Username},
+                {"Email", email},
+                {"Name", name},
                 {"Level", 0 },
                 {"Experience", 0 }
             };
